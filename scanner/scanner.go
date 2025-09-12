@@ -78,11 +78,28 @@ func (scanner Scanner) tokenize(s string) {
 	runeIdx := 0
 
 	for i := 0; i < sLen; {
+		ttype, ok := tryTokStrings(s[i:])
 
+		if ok {
+			tstrLen := len(tokStrings[ttype])
+
+			scanner.tChan <- Token{
+				TType:  ttype,
+				Line:   scanner.line,
+				Column: scanner.column,
+				Width:  tstrLen,
+			}
+
+			scanner.column += tstrLen
+
+			continue
+		}
+
+		ttype, s, ok := tryTokFunctions(s, i)
 	}
 }
 
-func tryTokStrings(s string, i int) (TokenType, bool) {
+func tryTokStrings(s string) (TokenType, bool) {
 	matchIdx := -1
 	maxMatch := 0
 
@@ -93,8 +110,8 @@ func tryTokStrings(s string, i int) (TokenType, bool) {
 			continue
 		}
 
-		if strings.HasPrefix(s[i:], tstr) {
-			nextRune, _ := utf8.DecodeRuneInString(s[i+tstrLen:])
+		if strings.HasPrefix(s, tstr) {
+			nextRune, _ := utf8.DecodeRuneInString(s[tstrLen:])
 
 			if !unicode.IsSpace(nextRune) {
 				matchIdx = tstrIdx
@@ -108,4 +125,10 @@ func tryTokStrings(s string, i int) (TokenType, bool) {
 	}
 
 	return TokenType(matchIdx), true
+}
+
+func tryTokFunctions(s string, i int) (TokenType, string, bool) {
+	// TODO: implement
+
+	return TOK_EOF, "", false
 }

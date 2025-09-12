@@ -12,6 +12,7 @@ type Token struct {
 	Line   int
 	Column int
 	Width  int
+	Text   string
 }
 
 type TokenType int
