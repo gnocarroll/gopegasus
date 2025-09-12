@@ -1,0 +1,40 @@
+package scanner
+
+type Scanner struct {
+}
+
+type Token struct {
+}
+
+type TokenType int
+
+const (
+	TOK_EOF TokenType = iota
+	TOK_L_PAREN
+	TOK_R_PAREN
+	TOK_L_BRACK
+	TOK_R_BRACK
+	TOK_SEMI
+	TOK_FUNCTION
+	TOK_IF
+	TOK_WHILE
+	TOK_END
+	TOK_GT
+	TOK_LT
+	TOK_GE
+	TOK_LE
+	TOK_EQ
+	TOK_EQ_EQ
+	TOK_BANG_EQ
+	TOK_NOT
+	TOK_AND
+	TOK_OR
+	TOK_PLUS
+	TOK_MINUS
+	TOK_STAR
+	TOK_STAR_STAR
+	TOK_F_SLASH
+	TOK_STRING
+	TOK_INTEGER
+	TOK_FLOAT
+)
