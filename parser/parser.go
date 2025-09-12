@@ -5,5 +5,12 @@ import (
 )
 
 type Parser struct {
-	scan *scanner.Scanner
+}
+
+func (parser *Parser) parse(scan *scanner.Scanner) {
+
+}
+
+func (parser *Parser) Parse(scan *scanner.Scanner) {
+	go parser.parse(scan)
 }
