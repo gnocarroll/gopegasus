@@ -44,7 +44,7 @@ const (
 	TOK_FLOAT
 )
 
-var tokStrings = [...]string{
+var TokStrings = [...]string{
 	TOK_L_PAREN:   "(",
 	TOK_R_PAREN:   ")",
 	TOK_L_BRACK:   "[",
@@ -76,13 +76,20 @@ var tokStrings = [...]string{
 	TOK_OR:        "or",
 }
 
+func NewScanner() Scanner {
+	return Scanner{
+		tChan: make(chan Token, 1000),
+		isEof: true,
+	}
+}
+
 func (scanner *Scanner) token(ttype TokenType) Token {
 	tstr := ""
 	tstrlen := 0
 	ttypeInt := int(ttype)
 
-	if ttypeInt >= 0 && ttypeInt < len(tokStrings) {
-		tstr = tokStrings[ttype]
+	if ttypeInt >= 0 && ttypeInt < len(TokStrings) {
+		tstr = TokStrings[ttype]
 		tstrlen = len(tstr)
 	}
 
@@ -123,7 +130,7 @@ func (scanner *Scanner) Peek() Token {
 	return scanner.peek
 }
 
-func (scanner *Scanner) Tokenize(s string) {
+func (scanner *Scanner) tokenize(s string) {
 	sLen := len(s)
 
 	for i := 0; i < sLen; {
@@ -131,10 +138,29 @@ func (scanner *Scanner) Tokenize(s string) {
 
 		i += nbytes
 
-		ttype, ok := tryTokStrings(s[i:])
+		ttype, tstr, ok := tryTokFunctions(s[i:])
 
 		if ok {
-			tstrLen := len(tokStrings[ttype])
+			tstrLen := len(tstr)
+
+			scanner.tChan <- Token{
+				TType:  ttype,
+				Line:   scanner.line,
+				Column: scanner.column,
+				Width:  tstrLen,
+				Text:   tstr,
+			}
+
+			i += tstrLen
+			scanner.column += tstrLen
+
+			continue
+		}
+
+		ttype, ok = tryTokStrings(s[i:])
+
+		if ok {
+			tstrLen := len(TokStrings[ttype])
 
 			scanner.tChan <- Token{
 				TType:  ttype,
@@ -143,25 +169,8 @@ func (scanner *Scanner) Tokenize(s string) {
 				Width:  tstrLen,
 			}
 
+			i += tstrLen
 			scanner.column += tstrLen
-
-			continue
-		}
-
-		ttype, tstr, ok := tryTokFunctions(s[i:])
-
-		if ok {
-			tstrlen := len(tstr)
-
-			scanner.tChan <- Token{
-				TType:  ttype,
-				Line:   scanner.line,
-				Column: scanner.column,
-				Width:  tstrlen,
-				Text:   tstr,
-			}
-
-			scanner.column += tstrlen
 
 			continue
 		}
@@ -169,8 +178,16 @@ func (scanner *Scanner) Tokenize(s string) {
 		// failed to parse token
 
 		scanner.tChan <- scanner.token(TOK_FAILURE)
-		return
+		break
 	}
+
+	scanner.tChan <- scanner.token(TOK_EOF)
+}
+
+func (scanner *Scanner) Tokenize(s string) {
+	scanner.isEof = false
+
+	go scanner.tokenize(s)
 }
 
 // consume ignored characters (comments, whitespace)
@@ -220,21 +237,18 @@ func tryTokStrings(s string) (TokenType, bool) {
 	matchIdx := -1
 	maxMatch := 0
 
-	for tstrIdx, tstr := range tokStrings {
+	for tstrIdx, tstr := range TokStrings {
 		tstrLen := len(tstr)
 
-		if tstrLen <= maxMatch {
+		if tstrLen <= maxMatch ||
+			!strings.HasPrefix(s, tstr) {
 			continue
 		}
 
-		if strings.HasPrefix(s, tstr) {
-			nextRune, _ := utf8.DecodeRuneInString(s[tstrLen:])
+		// passed checks, update max match
 
-			if !unicode.IsSpace(nextRune) {
-				matchIdx = tstrIdx
-				maxMatch = tstrLen
-			}
-		}
+		matchIdx = tstrIdx
+		maxMatch = tstrLen
 	}
 
 	if matchIdx == -1 {
@@ -301,7 +315,17 @@ func scanIdent(s string) (TokenType, string, bool) {
 		}
 	}
 
-	return TOK_IDENT, s[:width], true
+	identStr := s[:width]
+
+	// ensure that identStr does not match any keywords
+
+	for _, tstr := range TokStrings {
+		if identStr == tstr {
+			return TOK_EOF, "", false
+		}
+	}
+
+	return TOK_IDENT, identStr, true
 }
 
 func scanFloat(s string) (TokenType, string, bool) {
