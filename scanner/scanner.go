@@ -8,6 +8,7 @@ import (
 
 const (
 	TOK_EOF TokenType = iota
+	TOK_FAILURE
 	TOK_L_PAREN
 	TOK_R_PAREN
 	TOK_L_BRACK
@@ -75,7 +76,7 @@ var tokStrings = [...]string{
 	TOK_OR:        "or",
 }
 
-func (scanner Scanner) token(ttype TokenType) Token {
+func (scanner *Scanner) token(ttype TokenType) Token {
 	tstr := ""
 	tstrlen := 0
 	ttypeInt := int(ttype)
@@ -94,27 +95,42 @@ func (scanner Scanner) token(ttype TokenType) Token {
 	}
 }
 
-func (scanner Scanner) Next() Token {
-	return scanner.token(TOK_EOF)
-}
-
-func (scanner Scanner) Peek() Token {
+func (scanner *Scanner) Advance() Token {
 	if scanner.isEof {
-		return scanner.peek
+		select {
+		case scanner.peek = <-scanner.tChan:
+			scanner.isEof = false
+		default: // still EOF
+			return scanner.peek
+		}
+	} else {
+		scanner.peek = <-scanner.tChan
 	}
 
 	if scanner.peek.TType == TOK_EOF {
-		scanner.Next()
+		scanner.isEof = true
 	}
 
 	return scanner.peek
 }
 
-func (scanner Scanner) Tokenize(s string) {
+func (scanner *Scanner) Peek() Token {
+	// if upcoming token's type is EOF, try to Advance
+	if scanner.peek.TType == TOK_EOF {
+		scanner.Advance()
+	}
+
+	return scanner.peek
+}
+
+func (scanner *Scanner) Tokenize(s string) {
 	sLen := len(s)
-	runeIdx := 0
 
 	for i := 0; i < sLen; {
+		nbytes := consumeIgnored(s[i:])
+
+		i += nbytes
+
 		ttype, ok := tryTokStrings(s[i:])
 
 		if ok {
@@ -132,10 +148,74 @@ func (scanner Scanner) Tokenize(s string) {
 			continue
 		}
 
-		ttype, s, ok := tryTokFunctions(s[i:])
+		ttype, tstr, ok := tryTokFunctions(s[i:])
+
+		if ok {
+			tstrlen := len(tstr)
+
+			scanner.tChan <- Token{
+				TType:  ttype,
+				Line:   scanner.line,
+				Column: scanner.column,
+				Width:  tstrlen,
+				Text:   tstr,
+			}
+
+			scanner.column += tstrlen
+
+			continue
+		}
+
+		// failed to parse token
+
+		scanner.tChan <- scanner.token(TOK_FAILURE)
+		return
 	}
 }
 
+// consume ignored characters (comments, whitespace)
+func consumeIgnored(s string) int {
+	i := 0
+	sLen := len(s)
+
+	for i < sLen {
+		r, bytes := utf8.DecodeRuneInString(s[i:])
+
+		nextR, nextBytes := ' ', 1
+
+		if i+bytes < sLen {
+			nextR, nextBytes = utf8.DecodeRuneInString(s[i+bytes:])
+		}
+
+		// skip past comment
+		if r == '/' && nextR == '/' {
+			i += (bytes + nextBytes)
+
+			for i < sLen {
+				r, bytes := utf8.DecodeRuneInString(s[i:])
+
+				i += bytes
+
+				if r == '\n' {
+					break
+				}
+			}
+
+			continue
+		}
+
+		if !unicode.IsSpace(r) {
+			break
+		}
+
+		// is space, add width of rune
+		i += bytes
+	}
+
+	return i
+}
+
+// see if next token matches fixed-width string tokens
 func tryTokStrings(s string) (TokenType, bool) {
 	matchIdx := -1
 	maxMatch := 0
@@ -166,6 +246,8 @@ func tryTokStrings(s string) (TokenType, bool) {
 
 type ScanFunc func(string) (TokenType, string, bool)
 
+// see if next token can be found by scanner funcs for variable-length tokens
+// (e.g. integers, identifiers, etc.)
 func tryTokFunctions(s string) (TokenType, string, bool) {
 	scanFuncs := [...]ScanFunc{scanInteger, scanIdent, scanFloat}
 
