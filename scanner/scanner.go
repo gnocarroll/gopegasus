@@ -75,7 +75,42 @@ var tokStrings = [...]string{
 	TOK_OR:        "or",
 }
 
-func (scanner Scanner) tokenize(s string) {
+func (scanner Scanner) token(ttype TokenType) Token {
+	tstr := ""
+	tstrlen := 0
+	ttypeInt := int(ttype)
+
+	if ttypeInt >= 0 && ttypeInt < len(tokStrings) {
+		tstr = tokStrings[ttype]
+		tstrlen = len(tstr)
+	}
+
+	return Token{
+		TType:  ttype,
+		Line:   scanner.line,
+		Column: scanner.column,
+		Width:  tstrlen,
+		Text:   tstr,
+	}
+}
+
+func (scanner Scanner) Next() Token {
+	return scanner.token(TOK_EOF)
+}
+
+func (scanner Scanner) Peek() Token {
+	if scanner.isEof {
+		return scanner.peek
+	}
+
+	if scanner.peek.TType == TOK_EOF {
+		scanner.Next()
+	}
+
+	return scanner.peek
+}
+
+func (scanner Scanner) Tokenize(s string) {
 	sLen := len(s)
 	runeIdx := 0
 

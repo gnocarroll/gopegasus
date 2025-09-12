@@ -5,6 +5,10 @@ type Scanner struct {
 
 	line   int
 	column int
+
+	peek Token
+
+	isEof bool
 }
 
 type Token struct {
