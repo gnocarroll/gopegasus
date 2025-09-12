@@ -8,7 +8,7 @@ import (
 	"unicode/utf8"
 )
 
-var MAX_BUFFERED_TOKENS = 1000000
+const MAX_BUFFERED_TOKENS = 1000000
 
 const (
 	TOK_EOF TokenType = iota
@@ -85,6 +85,9 @@ func (scanner *Scanner) initScanner() {
 
 	scanner.tChan = &tChan
 	scanner.isEof = true
+
+	scanner.line = 1
+	scanner.column = 1
 }
 
 func NewScanner() Scanner {
@@ -150,7 +153,7 @@ func (scanner *Scanner) tokenize(s string) {
 	sLen := len(s)
 
 	for i := 0; i < sLen; {
-		nbytes := consumeIgnored(s[i:])
+		nbytes := scanner.consumeIgnored(s[i:])
 
 		i += nbytes
 
@@ -168,7 +171,7 @@ func (scanner *Scanner) tokenize(s string) {
 			}
 
 			i += tstrLen
-			scanner.column += tstrLen
+			scanner.column += utf8.RuneCountInString(tstr)
 
 			continue
 		}
@@ -186,7 +189,7 @@ func (scanner *Scanner) tokenize(s string) {
 			}
 
 			i += tstrLen
-			scanner.column += tstrLen
+			scanner.column += utf8.RuneCountInString(tstr)
 
 			continue
 		}
@@ -207,6 +210,8 @@ func (scanner *Scanner) Tokenize(s string) {
 
 	scanner.isEof = false
 
+	// do tokenization work in separate goroutine
+
 	go scanner.tokenize(s)
 }
 
@@ -222,7 +227,7 @@ func (scanner *Scanner) TokenizeFile(filepath string) {
 }
 
 // consume ignored characters (comments, whitespace)
-func consumeIgnored(s string) int {
+func (scanner *Scanner) consumeIgnored(s string) int {
 	i := 0
 	sLen := len(s)
 
@@ -237,14 +242,18 @@ func consumeIgnored(s string) int {
 
 		// skip past comment
 		if r == '/' && nextR == '/' {
+			scanner.column += 2 // for two forward slashes
 			i += (bytes + nextBytes)
 
 			for i < sLen {
 				r, bytes := utf8.DecodeRuneInString(s[i:])
 
+				scanner.column++
 				i += bytes
 
 				if r == '\n' {
+					scanner.line++
+					scanner.column = 1
 					break
 				}
 			}
@@ -256,7 +265,15 @@ func consumeIgnored(s string) int {
 			break
 		}
 
+		if r == '\n' {
+			scanner.line++
+			scanner.column = 1
+		} else {
+			scanner.column++
+		}
+
 		// is space, add width of rune
+
 		i += bytes
 	}
 
