@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"errors"
 	"pegasus/scanner"
 )
 
@@ -34,6 +35,6 @@ func (parser *Parser) Parse(scan *scanner.Scanner) {
 	go parser.parse(scan)
 }
 
-func (parser *Parser) parseFile(scan *scanner.Scanner) *File {
-	return nil
+func (parser *Parser) parseFile(scan *scanner.Scanner) (*File, error) {
+	return nil, errors.New("implement...")
 }

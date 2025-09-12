@@ -80,6 +80,44 @@ var TokStrings = [...]string{
 	TOK_OR:        "or",
 }
 
+var TokDescs = [...]string{
+	TOK_EOF:       "End-of-file",
+	TOK_FAILURE:   "",
+	TOK_L_PAREN:   "",
+	TOK_R_PAREN:   "",
+	TOK_L_BRACK:   "Left Bracket ('[')",
+	TOK_R_BRACK:   "Right Bracket (']')",
+	TOK_SEMI:      "Semicolon (';')",
+	TOK_FUNCTION:  "Function ('function')",
+	TOK_LAMBDA:    "Lambda ('lambda')",
+	TOK_IF:        "If ('if')",
+	TOK_FOR:       "For ('for')",
+	TOK_WHILE:     "While ('while')",
+	TOK_END:       "End ('end')",
+	TOK_GT:        "Greater Than ('>')",
+	TOK_LT:        "Less Than ('<')",
+	TOK_GE:        "Greater Than Or Equal To ('>=')",
+	TOK_LE:        "Less Than Or Equal To ('<=')",
+	TOK_EQ:        "Assign ('=')",
+	TOK_EQ_EQ:     "Equal To ('==')",
+	TOK_COLON_EQ:  "Assign + Infer Type (':=')",
+	TOK_BANG_EQ:   "Not Equal To ('!=')",
+	TOK_NOT:       "Not ('not')",
+	TOK_AND:       "And ('and')",
+	TOK_OR:        "Or ('or')",
+	TOK_PLUS:      "Plus ('+')",
+	TOK_MINUS:     "Minus ('-')",
+	TOK_STAR:      "Star ('*')",
+	TOK_STAR_STAR: "Two Stars ('**')",
+	TOK_PERIOD:    "Period ('.')",
+	TOK_F_SLASH:   "Forward Slash ('/')",
+	TOK_COLON:     "Colon (':')",
+	TOK_STRING:    "String Literal",
+	TOK_IDENT:     "Identifier",
+	TOK_INTEGER:   "Integer",
+	TOK_FLOAT:     "Floating-Point Number",
+}
+
 func (scanner *Scanner) initScanner() {
 	tChan := make(chan Token, MAX_BUFFERED_TOKENS)
 
