@@ -1,38 +1,21 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"pegasus/scanner"
 )
 
 func main() {
-	s := "5 5 5"
+	flag.Parse()
 
-	scan := scanner.NewScanner()
+	filename := ""
 
-	scan.Tokenize(s)
+	args := flag.Args()
+	nargs := len(args)
 
-	i := 0
-
-	for {
-		tok := scan.Advance()
-
-		if tok.TType == scanner.TOK_EOF {
-			break
-		}
-
-		tokStr := ""
-
-		if int(tok.TType) < len(scanner.TokStrings) &&
-			scanner.TokStrings[tok.TType] != "" {
-
-			tokStr = scanner.TokStrings[tok.TType]
-		} else {
-			tokStr = tok.Text
-		}
-
-		fmt.Printf("%d: %s\n", i, tokStr)
-
-		i++
+	if nargs > 0 {
+		filename = args[0]
 	}
+
+	fmt.Printf("FILE: %s\n", filename)
 }
