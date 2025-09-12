@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"pegasus/scanner"
 )
 
 func main() {
@@ -17,5 +17,7 @@ func main() {
 		filename = args[0]
 	}
 
-	fmt.Printf("FILE: %s\n", filename)
+	scan := scanner.NewScanner()
+
+	scan.TokenizeFile(filename)
 }

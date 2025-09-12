@@ -8,6 +8,8 @@ import (
 	"unicode/utf8"
 )
 
+var MAX_BUFFERED_TOKENS = 1000000
+
 const (
 	TOK_EOF TokenType = iota
 	TOK_FAILURE
@@ -78,11 +80,19 @@ var TokStrings = [...]string{
 	TOK_OR:        "or",
 }
 
+func (scanner *Scanner) initScanner() {
+	tChan := make(chan Token, MAX_BUFFERED_TOKENS)
+
+	scanner.tChan = &tChan
+	scanner.isEof = true
+}
+
 func NewScanner() Scanner {
-	return Scanner{
-		tChan: make(chan Token, 1000),
-		isEof: true,
-	}
+	var ret Scanner
+
+	ret.initScanner()
+
+	return ret
 }
 
 func (scanner *Scanner) token(ttype TokenType) Token {
@@ -105,15 +115,19 @@ func (scanner *Scanner) token(ttype TokenType) Token {
 }
 
 func (scanner *Scanner) Advance() Token {
+	if scanner.tChan == nil {
+		scanner.initScanner()
+	}
+
 	if scanner.isEof {
 		select {
-		case scanner.peek = <-scanner.tChan:
+		case scanner.peek = <-*scanner.tChan:
 			scanner.isEof = false
 		default: // still EOF
 			return scanner.peek
 		}
 	} else {
-		scanner.peek = <-scanner.tChan
+		scanner.peek = <-*scanner.tChan
 	}
 
 	if scanner.peek.TType == TOK_EOF {
@@ -145,7 +159,7 @@ func (scanner *Scanner) tokenize(s string) {
 		if ok {
 			tstrLen := len(tstr)
 
-			scanner.tChan <- Token{
+			*scanner.tChan <- Token{
 				TType:  ttype,
 				Line:   scanner.line,
 				Column: scanner.column,
@@ -164,7 +178,7 @@ func (scanner *Scanner) tokenize(s string) {
 		if ok {
 			tstrLen := len(TokStrings[ttype])
 
-			scanner.tChan <- Token{
+			*scanner.tChan <- Token{
 				TType:  ttype,
 				Line:   scanner.line,
 				Column: scanner.column,
@@ -179,14 +193,18 @@ func (scanner *Scanner) tokenize(s string) {
 
 		// failed to parse token
 
-		scanner.tChan <- scanner.token(TOK_FAILURE)
+		*scanner.tChan <- scanner.token(TOK_FAILURE)
 		break
 	}
 
-	scanner.tChan <- scanner.token(TOK_EOF)
+	*scanner.tChan <- scanner.token(TOK_EOF)
 }
 
 func (scanner *Scanner) Tokenize(s string) {
+	if scanner.tChan == nil {
+		scanner.initScanner()
+	}
+
 	scanner.isEof = false
 
 	go scanner.tokenize(s)

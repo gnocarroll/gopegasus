@@ -1,7 +1,7 @@
 package scanner
 
 type Scanner struct {
-	tChan chan Token
+	tChan *chan Token
 
 	line   int
 	column int
