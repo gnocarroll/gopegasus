@@ -1,48 +1,84 @@
 package parser
 
+import "pegasus/scanner"
+
 type INode interface {
 	nodeTag()
+
+	Name() string
+	Line() int
+	Column() int
 }
 
-type Node struct{}
+type Node struct {
+	name   string
+	line   int
+	column int
+}
 
 func (node *Node) nodeTag() {}
-
-type HasName struct {
-	name string
+func (node *Node) Name() string {
+	return node.name
 }
-
-func (hasName *HasName) Name() string {
-	return hasName.name
+func (node *Node) Line() int {
+	return node.line
+}
+func (node *Node) Column() int {
+	return node.column
 }
 
 type File struct {
-	HasName
 	Node
 
-	definitions []*IDefinition
-}
-
-type IDefinition interface {
-	definitionTag()
-	Name() string
+	definitions []Definition
 }
 
 type Definition struct {
 	Node
-	HasName
+
+	Type  *IExpr
+	Value *IExpr
 }
 
-func (*Definition) definitionTag() {}
-
-type VarDefinition struct {
-	Definition
+type IExpr interface {
+	exprTag()
 }
 
-type TypeDefinition struct {
-	Definition
+type Expr struct {
+	Node
 }
 
-type FunctionDefinition struct {
-	Definition
+func (expr *Expr) exprTag() {}
+
+type BinaryExpr struct {
+	Expr
+
+	Operator scanner.Token
+	Lhs      *IExpr
+	Rhs      *IExpr
+}
+
+type UnaryExpr struct {
+	Expr
+
+	Operator scanner.Token
+	SubExpr  *IExpr
+}
+
+type IntegerLiteral struct {
+	Expr
+
+	Value uint64
+}
+
+type StringLiteral struct {
+	Expr
+
+	Text string
+}
+
+type FloatLiteral struct {
+	Expr
+
+	Value float64
 }

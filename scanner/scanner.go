@@ -81,10 +81,10 @@ var TokStrings = [...]string{
 }
 
 var TokDescs = [...]string{
-	TOK_EOF:       "End-of-file",
-	TOK_FAILURE:   "",
-	TOK_L_PAREN:   "",
-	TOK_R_PAREN:   "",
+	TOK_EOF:       "End of File",
+	TOK_FAILURE:   "Scanner Failure (Unable to Determine Token)",
+	TOK_L_PAREN:   "Left Paren ('(')",
+	TOK_R_PAREN:   "Right Paren (')')",
 	TOK_L_BRACK:   "Left Bracket ('[')",
 	TOK_R_BRACK:   "Right Bracket (']')",
 	TOK_SEMI:      "Semicolon (';')",
@@ -116,6 +116,14 @@ var TokDescs = [...]string{
 	TOK_IDENT:     "Identifier",
 	TOK_INTEGER:   "Integer",
 	TOK_FLOAT:     "Floating-Point Number",
+}
+
+func (ttype TokenType) Desc() string {
+	if ttype < 0 || int(ttype) >= len(TokDescs) {
+		return ""
+	}
+
+	return TokDescs[ttype]
 }
 
 func (scanner *Scanner) initScanner() {
