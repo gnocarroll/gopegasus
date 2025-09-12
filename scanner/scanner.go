@@ -1,6 +1,8 @@
 package scanner
 
 import (
+	"log"
+	"os"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -188,6 +190,17 @@ func (scanner *Scanner) Tokenize(s string) {
 	scanner.isEof = false
 
 	go scanner.tokenize(s)
+}
+
+func (scanner *Scanner) TokenizeFile(filepath string) {
+	bytes, err := os.ReadFile(filepath)
+
+	if err != nil {
+		log.Fatalf("TokenizeFile failed to ReadFile: %s\n", err)
+		return
+	}
+
+	scanner.Tokenize(string(bytes))
 }
 
 // consume ignored characters (comments, whitespace)
