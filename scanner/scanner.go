@@ -34,6 +34,7 @@ const (
 	TOK_MINUS
 	TOK_STAR
 	TOK_STAR_STAR
+	TOK_PERIOD
 	TOK_F_SLASH
 	TOK_COLON
 	TOK_STRING
@@ -56,6 +57,7 @@ var tokStrings = [...]string{
 	TOK_END:       "end",
 	TOK_STAR:      "*",
 	TOK_F_SLASH:   "/",
+	TOK_PERIOD:    ".",
 	TOK_STAR_STAR: "**",
 	TOK_PLUS:      "+",
 	TOK_MINUS:     "-",
@@ -95,7 +97,7 @@ func (scanner Scanner) tokenize(s string) {
 			continue
 		}
 
-		ttype, s, ok := tryTokFunctions(s, i)
+		ttype, s, ok := tryTokFunctions(s[i:])
 	}
 }
 
@@ -127,8 +129,64 @@ func tryTokStrings(s string) (TokenType, bool) {
 	return TokenType(matchIdx), true
 }
 
-func tryTokFunctions(s string, i int) (TokenType, string, bool) {
-	// TODO: implement
+type ScanFunc func(string) (TokenType, string, bool)
 
+func tryTokFunctions(s string) (TokenType, string, bool) {
+	scanFuncs := [...]ScanFunc{scanInteger, scanIdent, scanFloat}
+
+	for _, scanFunc := range scanFuncs {
+		ttype, s, ok := scanFunc(s)
+
+		if !ok {
+			continue
+		}
+
+		return ttype, s, ok
+	}
+
+	return TOK_EOF, "", false
+}
+
+func scanInteger(s string) (TokenType, string, bool) {
+	width := 0
+
+	for _, r := range s {
+		if unicode.IsDigit(r) {
+			width += utf8.RuneLen(r)
+		} else {
+			break
+		}
+	}
+
+	if width == 0 {
+		return TOK_EOF, "", false
+	}
+
+	return TOK_INTEGER, s[:width], true
+}
+
+func scanIdent(s string) (TokenType, string, bool) {
+	width := 0
+
+	r, bytes := utf8.DecodeRuneInString(s)
+
+	if r != '_' && !unicode.IsLetter(r) {
+		return TOK_EOF, "", false
+	}
+
+	width += bytes
+
+	for _, r := range s[width:] {
+		if r == '_' || unicode.IsLetter(r) || unicode.IsDigit(r) {
+			width += utf8.RuneLen(r)
+		} else {
+			break
+		}
+	}
+
+	return TOK_IDENT, s[:width], true
+}
+
+func scanFloat(s string) (TokenType, string, bool) {
 	return TOK_EOF, "", false
 }
