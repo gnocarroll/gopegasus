@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"errors"
 	"pegasus/scanner"
 )
 
@@ -21,10 +20,15 @@ func NewParser() Parser {
 	return parser
 }
 
-func (parser *Parser) parse(scan *scanner.Scanner) {
-	f := parser.parseFile(scan)
+func (parser *Parser) send(node INode) {
+	if node != nil {
+		*parser.nodeChan <- node
+	}
+}
 
-	*parser.nodeChan <- f
+func (parser *Parser) parse(scan *scanner.Scanner) {
+	parser.send(parser.parseFile(scan))
+
 }
 
 func (parser *Parser) Parse(scan *scanner.Scanner) {
@@ -35,6 +39,6 @@ func (parser *Parser) Parse(scan *scanner.Scanner) {
 	go parser.parse(scan)
 }
 
-func (parser *Parser) parseFile(scan *scanner.Scanner) (*File, error) {
-	return nil, errors.New("implement...")
+func (parser *Parser) parseFile(scan *scanner.Scanner) *File {
+	return nil
 }
