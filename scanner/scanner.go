@@ -20,6 +20,10 @@ const (
 	TOK_SEMI
 	TOK_FUNCTION
 	TOK_LAMBDA
+	TOK_STRUCT
+	TOK_CLASS
+	TOK_ENUM
+	TOK_VARIANT
 	TOK_IF
 	TOK_FOR
 	TOK_WHILE
@@ -31,6 +35,7 @@ const (
 	TOK_EQ
 	TOK_EQ_EQ
 	TOK_COLON_EQ
+	TOK_COLOL_COLON
 	TOK_BANG_EQ
 	TOK_NOT
 	TOK_AND
@@ -49,35 +54,40 @@ const (
 )
 
 var TokStrings = [...]string{
-	TOK_L_PAREN:   "(",
-	TOK_R_PAREN:   ")",
-	TOK_L_BRACK:   "[",
-	TOK_R_BRACK:   "]",
-	TOK_SEMI:      ";",
-	TOK_FUNCTION:  "function",
-	TOK_IF:        "if",
-	TOK_WHILE:     "while",
-	TOK_LAMBDA:    "lambda",
-	TOK_FOR:       "for",
-	TOK_END:       "end",
-	TOK_STAR:      "*",
-	TOK_F_SLASH:   "/",
-	TOK_PERIOD:    ".",
-	TOK_STAR_STAR: "**",
-	TOK_PLUS:      "+",
-	TOK_MINUS:     "-",
-	TOK_LT:        "<",
-	TOK_GT:        ">",
-	TOK_LE:        "<=",
-	TOK_GE:        ">=",
-	TOK_EQ:        "=",
-	TOK_COLON:     ":",
-	TOK_COLON_EQ:  ":=",
-	TOK_EQ_EQ:     "==",
-	TOK_BANG_EQ:   "!=",
-	TOK_NOT:       "not",
-	TOK_AND:       "and",
-	TOK_OR:        "or",
+	TOK_L_PAREN:     "(",
+	TOK_R_PAREN:     ")",
+	TOK_L_BRACK:     "[",
+	TOK_R_BRACK:     "]",
+	TOK_SEMI:        ";",
+	TOK_FUNCTION:    "function",
+	TOK_IF:          "if",
+	TOK_WHILE:       "while",
+	TOK_LAMBDA:      "lambda",
+	TOK_STRUCT:      "struct",
+	TOK_CLASS:       "class",
+	TOK_ENUM:        "enum",
+	TOK_VARIANT:     "variant",
+	TOK_COLON_COLON: "::",
+	TOK_FOR:         "for",
+	TOK_END:         "end",
+	TOK_STAR:        "*",
+	TOK_F_SLASH:     "/",
+	TOK_PERIOD:      ".",
+	TOK_STAR_STAR:   "**",
+	TOK_PLUS:        "+",
+	TOK_MINUS:       "-",
+	TOK_LT:          "<",
+	TOK_GT:          ">",
+	TOK_LE:          "<=",
+	TOK_GE:          ">=",
+	TOK_EQ:          "=",
+	TOK_COLON:       ":",
+	TOK_COLON_EQ:    ":=",
+	TOK_EQ_EQ:       "==",
+	TOK_BANG_EQ:     "!=",
+	TOK_NOT:         "not",
+	TOK_AND:         "and",
+	TOK_OR:          "or",
 }
 
 var TokDescs = [...]string{
@@ -93,6 +103,10 @@ var TokDescs = [...]string{
 	TOK_IF:        "If ('if')",
 	TOK_FOR:       "For ('for')",
 	TOK_WHILE:     "While ('while')",
+	TOK_STRUCT:    "Struct ('struct')",
+	TOK_CLASS:     "Class ('class')",
+	TOK_ENUM:      "Enum ('enum')",
+	TOK_VARIANT:   "Variant ('variant')",
 	TOK_END:       "End ('end')",
 	TOK_GT:        "Greater Than ('>')",
 	TOK_LT:        "Less Than ('<')",
@@ -136,12 +150,12 @@ func (scanner *Scanner) initScanner() {
 	scanner.column = 1
 }
 
-func NewScanner() Scanner {
+func NewScanner() *Scanner {
 	var ret Scanner
 
 	ret.initScanner()
 
-	return ret
+	return &ret
 }
 
 func (scanner *Scanner) token(ttype TokenType) Token {

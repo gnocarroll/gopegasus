@@ -5,19 +5,32 @@ import (
 )
 
 const MAX_BUFFERED_NODES = 1000000
+const MAX_PARSE_ERRORS = 100
 
 func (parser *Parser) initParser() {
 	nodeChan := make(chan INode, MAX_BUFFERED_NODES)
+	errChan := make(chan ParseError, MAX_PARSE_ERRORS)
 
 	parser.nodeChan = &nodeChan
+	parser.errChan = &errChan
 }
 
-func NewParser() Parser {
+func (parser *Parser) ErrorCount() int {
+	return int(parser.errCount.Load())
+}
+
+func NewParser(scan *scanner.Scanner) *Parser {
 	var parser Parser
 
 	parser.initParser()
 
-	return parser
+	parser.scan = scan
+
+	return &parser
+}
+
+func (parser *Parser) SetScanner(scan *scanner.Scanner) {
+	parser.scan = scan
 }
 
 func (parser *Parser) send(node INode) {
@@ -26,19 +39,118 @@ func (parser *Parser) send(node INode) {
 	}
 }
 
-func (parser *Parser) parse(scan *scanner.Scanner) {
-	parser.send(parser.parseFile(scan))
+func (parser *Parser) accept(ttype scanner.TokenType) (*scanner.Token, error) {
+	t := parser.scan.Peek()
+
+	if t.TType == ttype {
+		parser.scan.Advance()
+		return &t, nil
+	}
+
+	e := ParseError{
+		Expected: ttype,
+		Found:    t,
+	}
+
+	if parser.errCount.Load() < MAX_PARSE_ERRORS {
+		parser.errCount.Add(1)
+
+		*parser.errChan <- e
+	}
+
+	return nil, &e
+}
+
+func (parser *Parser) parse() {
+	parser.send(parser.parseFile())
 
 }
 
-func (parser *Parser) Parse(scan *scanner.Scanner) {
+func (parser *Parser) Parse() {
+	if parser.scan == nil {
+		return
+	}
 	if parser.nodeChan == nil {
 		parser.initParser()
 	}
 
-	go parser.parse(scan)
+	go parser.parse()
 }
 
-func (parser *Parser) parseFile(scan *scanner.Scanner) *File {
+func (parser *Parser) parseFile() *File {
+	var f File
+
+	for {
+		def := parser.parseDefinition()
+
+		if def == nil {
+			break
+		}
+
+		f.definitions = append(f.definitions, def)
+	}
+
+	f.SetPosition(1, 1)
+
+	return &f
+}
+
+func (parser *Parser) parseDefinition() *Definition {
+	next := parser.scan.Peek()
+
+	switch next.TType {
+	case scanner.TOK_STRUCT, scanner.TOK_CLASS:
+		return parser.parseTypeDef()
+	case scanner.TOK_ENUM:
+		return parser.parseEnumDef()
+	case scanner.TOK_FUNCTION:
+		return parser.parseFunctionDef()
+	case scanner.TOK_IDENT:
+		return parser.parseAssignment()
+	default:
+	}
+
 	return nil
+}
+
+func (parser *Parser) parseTypeDef() *Definition {
+	return nil
+}
+
+func (parser *Parser) parseEnumDef() *Definition {
+	next := parser.scan.Peek()
+
+	if next.TType != scanner.TOK_ENUM {
+		return nil
+	}
+
+	return nil
+}
+
+func (parser *Parser) parseFunctionDef() *Definition {
+	return nil
+}
+
+func (parser *Parser) parseAssignment() *Definition {
+	next := parser.scan.Peek()
+
+	if next.TType != scanner.TOK_IDENT {
+		return nil
+	}
+
+	parser.scan.Advance()
+
+	var ret Definition
+	ret.SetPosition(next.Line, next.Column)
+
+	next = parser.scan.Peek()
+
+	if next.TType == scanner.TOK_COLON {
+
+		parser.accept(scanner.TOK_EQ)
+	} else {
+		parser.accept(scanner.TOK_COLON_EQ)
+	}
+
+	return &ret
 }

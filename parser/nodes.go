@@ -8,6 +8,8 @@ type INode interface {
 	Name() string
 	Line() int
 	Column() int
+
+	SetPosition(int, int)
 }
 
 type Node struct {
@@ -26,11 +28,15 @@ func (node *Node) Line() int {
 func (node *Node) Column() int {
 	return node.column
 }
+func (node *Node) SetPosition(line int, column int) {
+	node.line = line
+	node.column = column
+}
 
 type File struct {
 	Node
 
-	definitions []Definition
+	definitions []*Definition
 }
 
 type Definition struct {

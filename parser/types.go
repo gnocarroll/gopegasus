@@ -2,13 +2,24 @@ package parser
 
 import (
 	"pegasus/scanner"
+	"sync/atomic"
 )
 
 type Parser struct {
+	scan *scanner.Scanner
+
 	nodeChan *chan INode
+	errChan  *chan ParseError
+
+	errCount atomic.Uint32
 }
 
-type TokenError struct {
+type ParseError struct {
 	Expected scanner.TokenType
 	Found    scanner.Token
+	Message  string
+}
+
+func (err *ParseError) Error() string {
+	return ""
 }
