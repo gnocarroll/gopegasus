@@ -21,7 +21,7 @@ var binaryOps [][]scanner.TokenType = [][]scanner.TokenType{
 	{scanner.TOK_STAR_STAR},
 }
 
-var nPrecLevels int = len(binaryOps)
+var maxPrec int = len(binaryOps) - 1
 
 func (parser *Parser) parseExpr() IExpr {
 	return parser.parseBinaryExpr()
@@ -35,10 +35,54 @@ func (parser *Parser) parseBinaryExprPrec(prec int) IExpr {
 	if prec < 0 {
 		prec = 0
 	}
+	if prec > maxPrec {
+		prec = maxPrec
+	}
 
-	return nil
+	parseNext := func() IExpr {
+		if prec >= maxPrec {
+			return parser.parseUnaryExpr()
+		}
+
+		return parser.parseBinaryExprPrec(prec + 1)
+	}
+
+	expr := parseNext()
+
+	if expr == nil {
+		return expr
+	}
+
+	line, column := expr.Position()
+
+	for {
+		foundOp := false
+		nextTok := parser.scan.Peek()
+
+		for _, op := range binaryOps[prec] {
+			if nextTok.TType == op {
+				foundOp = true
+				break
+			}
+		}
+
+		if !foundOp {
+			break
+		}
+
+		parser.scan.Advance()
+
+		expr = &BinaryExpr{
+			Operator: nextTok,
+			Lhs:      expr,
+			Rhs:      parseNext(),
+		}
+		expr.SetPosition(line, column)
+	}
+
+	return expr
 }
 
 func (parser *Parser) parseUnaryExpr() IExpr {
-
+	return nil
 }

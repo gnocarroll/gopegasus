@@ -9,6 +9,7 @@ type INode interface {
 	Line() int
 	Column() int
 
+	Position() (int, int)
 	SetPosition(int, int)
 }
 
@@ -27,6 +28,9 @@ func (node *Node) Line() int {
 }
 func (node *Node) Column() int {
 	return node.column
+}
+func (node *Node) Position() (int, int) {
+	return node.line, node.column
 }
 func (node *Node) SetPosition(line int, column int) {
 	node.line = line
@@ -49,6 +53,7 @@ type Definition struct {
 }
 
 type IExpr interface {
+	INode
 	exprTag()
 }
 
