@@ -23,6 +23,12 @@ var binaryOps [][]scanner.TokenType = [][]scanner.TokenType{
 
 var maxPrec int = len(binaryOps) - 1
 
+var unaryOps []scanner.TokenType = []scanner.TokenType{
+	scanner.TOK_PLUS,
+	scanner.TOK_MINUS,
+	scanner.TOK_NOT,
+}
+
 func (parser *Parser) parseExpr() IExpr {
 	return parser.parseBinaryExpr()
 }
@@ -84,5 +90,32 @@ func (parser *Parser) parseBinaryExprPrec(prec int) IExpr {
 }
 
 func (parser *Parser) parseUnaryExpr() IExpr {
+	foundOp := false
+	nextTok := parser.scan.Peek()
+
+	for _, op := range unaryOps {
+		if nextTok.TType == op {
+			foundOp = true
+			break
+		}
+	}
+
+	if foundOp {
+		parser.scan.Advance()
+	}
+
+	subExpr := parser.parsePostfixExpr()
+
+	if !foundOp {
+		return subExpr
+	}
+
+	return &UnaryExpr{
+		Operator: nextTok,
+		SubExpr:  subExpr,
+	}
+}
+
+func (parser *Parser) parsePostfixExpr() IExpr {
 	return nil
 }
