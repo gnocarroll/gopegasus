@@ -34,6 +34,9 @@ const (
 	TOK_LE
 	TOK_EQ
 	TOK_EQ_EQ
+	TOK_LT_LT
+	TOK_GT_GT
+	TOK_PERCENT
 	TOK_AMPERSAND
 	TOK_CARROT
 	TOK_TILDE
@@ -70,6 +73,9 @@ var TokStrings = [...]string{
 	TOK_CARROT:      "^",
 	TOK_TILDE:       "~",
 	TOK_PIPE:        "|",
+	TOK_LT_LT:       "<<",
+	TOK_GT_GT:       ">>",
+	TOK_PERCENT:     "%",
 	TOK_LAMBDA:      "lambda",
 	TOK_STRUCT:      "struct",
 	TOK_CLASS:       "class",
@@ -109,6 +115,9 @@ var TokDescs = [...]string{
 	TOK_CARROT:    "Carrot ('^')",
 	TOK_TILDE:     "Tilde ('~')",
 	TOK_PIPE:      "Pipe ('|')",
+	TOK_LT_LT:     "Left Shift ('<<')",
+	TOK_GT_GT:     "Right Shift ('>>')",
+	TOK_PERCENT:   "Percent ('%')",
 	TOK_SEMI:      "Semicolon (';')",
 	TOK_FUNCTION:  "Function ('function')",
 	TOK_LAMBDA:    "Lambda ('lambda')",
