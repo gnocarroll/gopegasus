@@ -34,8 +34,12 @@ const (
 	TOK_LE
 	TOK_EQ
 	TOK_EQ_EQ
+	TOK_AMPERSAND
+	TOK_CARROT
+	TOK_TILDE
+	TOK_PIPE
 	TOK_COLON_EQ
-	TOK_COLOL_COLON
+	TOK_COLON_COLON
 	TOK_BANG_EQ
 	TOK_NOT
 	TOK_AND
@@ -62,6 +66,10 @@ var TokStrings = [...]string{
 	TOK_FUNCTION:    "function",
 	TOK_IF:          "if",
 	TOK_WHILE:       "while",
+	TOK_AMPERSAND:   "&",
+	TOK_CARROT:      "^",
+	TOK_TILDE:       "~",
+	TOK_PIPE:        "|",
 	TOK_LAMBDA:      "lambda",
 	TOK_STRUCT:      "struct",
 	TOK_CLASS:       "class",
@@ -97,6 +105,10 @@ var TokDescs = [...]string{
 	TOK_R_PAREN:   "Right Paren (')')",
 	TOK_L_BRACK:   "Left Bracket ('[')",
 	TOK_R_BRACK:   "Right Bracket (']')",
+	TOK_AMPERSAND: "Ampersand ('&')",
+	TOK_CARROT:    "Carrot ('^')",
+	TOK_TILDE:     "Tilde ('~')",
+	TOK_PIPE:      "Pipe ('|')",
 	TOK_SEMI:      "Semicolon (';')",
 	TOK_FUNCTION:  "Function ('function')",
 	TOK_LAMBDA:    "Lambda ('lambda')",

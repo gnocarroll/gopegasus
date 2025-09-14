@@ -42,8 +42,10 @@ type File struct {
 type Definition struct {
 	Node
 
-	Type  *IExpr
-	Value *IExpr
+	InferType bool
+
+	Type  IExpr
+	Value IExpr
 }
 
 type IExpr interface {
@@ -60,15 +62,15 @@ type BinaryExpr struct {
 	Expr
 
 	Operator scanner.Token
-	Lhs      *IExpr
-	Rhs      *IExpr
+	Lhs      IExpr
+	Rhs      IExpr
 }
 
 type UnaryExpr struct {
 	Expr
 
 	Operator scanner.Token
-	SubExpr  *IExpr
+	SubExpr  IExpr
 }
 
 type IntegerLiteral struct {

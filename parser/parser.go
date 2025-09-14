@@ -146,11 +146,16 @@ func (parser *Parser) parseAssignment() *Definition {
 	next = parser.scan.Peek()
 
 	if next.TType == scanner.TOK_COLON {
+		ret.Type = parser.parseExpr()
 
 		parser.accept(scanner.TOK_EQ)
 	} else {
+		ret.InferType = true
+
 		parser.accept(scanner.TOK_COLON_EQ)
 	}
+
+	ret.Value = parser.parseExpr()
 
 	return &ret
 }
