@@ -1,6 +1,10 @@
 package parser
 
-import "pegasus/scanner"
+import (
+	"log"
+	"pegasus/scanner"
+	"strconv"
+)
 
 var binaryOps [][]scanner.TokenType = [][]scanner.TokenType{
 	{scanner.TOK_OR},
@@ -89,6 +93,7 @@ func (parser *Parser) parseBinaryExprPrec(prec int) IExpr {
 	return expr
 }
 
+// unary operator in front
 func (parser *Parser) parseUnaryExpr() IExpr {
 	foundOp := false
 	nextTok := parser.scan.Peek()
@@ -116,6 +121,67 @@ func (parser *Parser) parseUnaryExpr() IExpr {
 	}
 }
 
+// e.g. function call, member access
 func (parser *Parser) parsePostfixExpr() IExpr {
+	subExpr := parser.parsePrimaryExpr()
+
+	if subExpr == nil {
+		return nil
+	}
+
+	return nil
+}
+
+func (parser *Parser) parsePrimaryExpr() IExpr {
+	var ret IExpr = nil
+	nextTok := parser.scan.Peek()
+
+	switch nextTok.TType {
+	case scanner.TOK_L_PAREN:
+		ret = parser.parseExpr()
+		parser.accept(scanner.TOK_R_PAREN)
+	case scanner.TOK_INTEGER:
+		value, err := strconv.ParseUint(
+			nextTok.Text,
+			0,
+			64,
+		)
+
+		if err != nil {
+			log.Printf("Expected integer in \"%s\"", nextTok.Text)
+			value = 0
+		}
+
+		ret = &IntegerLiteral{
+			Value: value,
+		}
+	case scanner.TOK_FLOAT:
+		value, err := strconv.ParseFloat(
+			nextTok.Text,
+			64,
+		)
+
+		if err != nil {
+			log.Printf("Expected float in \"%s\"", nextTok.Text)
+			value = 0.0
+		}
+
+		ret = &FloatLiteral{
+			Value: value,
+		}
+	case scanner.TOK_STRING:
+
+	default:
+		return nil
+	}
+
+	if nextTok.TType != scanner.TOK_L_PAREN {
+		// => should set position
+
+		ret.SetPosition(nextTok.Line, nextTok.Column)
+	}
+
+	parser.scan.Advance()
+
 	return nil
 }
