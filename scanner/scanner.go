@@ -209,10 +209,33 @@ func (scanner *Scanner) token(ttype TokenType) Token {
 	}
 }
 
+func (scanner *Scanner) fillCache() {
+	if scanner.isCacheFilled {
+		return
+	}
+
+	scanner.isCacheFilled = true
+
+	// should always get at least one TOK_EOF
+	scanner.peek = <-*scanner.tChan
+
+	if scanner.peek.TType == TOK_EOF {
+		scanner.isEof = true
+	} else {
+		// if did not find eof, then should be another token
+		// available at some point
+		scanner.peek2 = <-*scanner.tChan
+	}
+}
+
 func (scanner *Scanner) Advance() Token {
 	if scanner.tChan == nil {
 		scanner.initScanner()
 	}
+
+	// attempt to load first two tokens if not already done
+
+	scanner.fillCache()
 
 	ret := scanner.peek
 
@@ -225,7 +248,8 @@ func (scanner *Scanner) Advance() Token {
 		default: // still EOF
 			return ret
 		}
-	} else {
+	} else if scanner.peek2.TType != TOK_EOF {
+		// if second cached tok is not EOF then attempt to get another
 		chanTok = <-*scanner.tChan
 	}
 
@@ -240,26 +264,14 @@ func (scanner *Scanner) Advance() Token {
 }
 
 func (scanner *Scanner) Peek() Token {
-	// if upcoming token's type is EOF, try to Advance
-	if scanner.peek.TType == TOK_EOF {
-		scanner.Advance()
-	}
+	scanner.fillCache()
 
 	return scanner.peek
 }
 
 // returns the token after the one Peek() returns
 func (scanner *Scanner) PeekSecond() Token {
-	// first if upcoming token is EOF then
-	// attempt to load another Token
-
-	for i := 0; i < 2; i++ {
-		if scanner.peek.TType == TOK_EOF {
-			scanner.Advance()
-		} else {
-			break
-		}
-	}
+	scanner.fillCache()
 
 	return scanner.peek2
 }
@@ -316,27 +328,6 @@ func (scanner *Scanner) tokenize(s string) {
 	}
 
 	*scanner.tChan <- scanner.token(TOK_EOF)
-
-	// attempt to load and cache first two tokens
-
-	foundFirst := true
-
-	select {
-	case scanner.peek = <-*scanner.tChan:
-	default:
-		foundFirst = false
-	}
-
-	if foundFirst {
-		select {
-		case scanner.peek2 = <-*scanner.tChan:
-		default:
-		}
-	}
-
-	if scanner.peek.TType == TOK_EOF {
-		scanner.isEof = true
-	}
 }
 
 func (scanner *Scanner) Tokenize(s string) {

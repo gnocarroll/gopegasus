@@ -9,6 +9,9 @@ type Scanner struct {
 	peek  Token
 	peek2 Token
 
+	// filled cached of two tokens (peek, peek2)
+	isCacheFilled bool
+
 	isEof bool
 }
 

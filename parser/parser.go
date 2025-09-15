@@ -173,3 +173,9 @@ func (parser *Parser) parseAssignment() *Definition {
 
 	return &ret
 }
+
+func (parser *Parser) parseCallArgs() CallArgs {
+	var args CallArgs
+
+	return args
+}
