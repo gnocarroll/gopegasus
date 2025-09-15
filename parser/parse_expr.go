@@ -127,7 +127,7 @@ func (parser *Parser) parsePostfixExpr() IExpr {
 		return nil
 	}
 
-	return nil
+	return subExpr
 }
 
 func (parser *Parser) parsePrimaryExpr() IExpr {
