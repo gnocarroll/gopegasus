@@ -6,7 +6,8 @@ type Scanner struct {
 	line   int
 	column int
 
-	peek Token
+	peek  Token
+	peek2 Token
 
 	isEof bool
 }

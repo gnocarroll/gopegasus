@@ -214,22 +214,29 @@ func (scanner *Scanner) Advance() Token {
 		scanner.initScanner()
 	}
 
+	ret := scanner.peek
+
+	var chanTok Token
+
 	if scanner.isEof {
 		select {
-		case scanner.peek = <-*scanner.tChan:
+		case chanTok = <-*scanner.tChan:
 			scanner.isEof = false
 		default: // still EOF
-			return scanner.peek
+			return ret
 		}
 	} else {
-		scanner.peek = <-*scanner.tChan
+		chanTok = <-*scanner.tChan
 	}
+
+	scanner.peek = scanner.peek2
+	scanner.peek2 = chanTok
 
 	if scanner.peek.TType == TOK_EOF {
 		scanner.isEof = true
 	}
 
-	return scanner.peek
+	return ret
 }
 
 func (scanner *Scanner) Peek() Token {
@@ -239,6 +246,22 @@ func (scanner *Scanner) Peek() Token {
 	}
 
 	return scanner.peek
+}
+
+// returns the token after the one Peek() returns
+func (scanner *Scanner) PeekSecond() Token {
+	// first if upcoming token is EOF then
+	// attempt to load another Token
+
+	for i := 0; i < 2; i++ {
+		if scanner.peek.TType == TOK_EOF {
+			scanner.Advance()
+		} else {
+			break
+		}
+	}
+
+	return scanner.peek2
 }
 
 func (scanner *Scanner) tokenize(s string) {
@@ -293,6 +316,27 @@ func (scanner *Scanner) tokenize(s string) {
 	}
 
 	*scanner.tChan <- scanner.token(TOK_EOF)
+
+	// attempt to load and cache first two tokens
+
+	foundFirst := true
+
+	select {
+	case scanner.peek = <-*scanner.tChan:
+	default:
+		foundFirst = false
+	}
+
+	if foundFirst {
+		select {
+		case scanner.peek2 = <-*scanner.tChan:
+		default:
+		}
+	}
+
+	if scanner.peek.TType == TOK_EOF {
+		scanner.isEof = true
+	}
 }
 
 func (scanner *Scanner) Tokenize(s string) {
