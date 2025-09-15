@@ -104,3 +104,41 @@ func TestScanFloat(t *testing.T) {
 		}
 	}
 }
+
+func TestScanString(t *testing.T) {
+	validStrings := [...]string{
+		`"Hello"`,
+		`"Hello\"\"\"\\"`,
+		`"Hello, World!!!!\n\n\t\r"`,
+	}
+	invalidStrings := [...]string{
+		`"Hello`,
+		`"Hello\"`,
+		`Hello`,
+		`9.5`,
+		`9`,
+		`if x < 5`,
+	}
+
+	for _, s := range validStrings {
+		_, foundS, found := scanString(s)
+
+		if !found {
+			t.Errorf("Expected to find string literal in \"%s\"", s)
+		}
+		if s != foundS {
+			t.Errorf(
+				"Expected to receive \"%s\", got \"%s\"",
+				s,
+				foundS,
+			)
+		}
+	}
+	for _, s := range invalidStrings {
+		_, _, found := scanString(s)
+
+		if found {
+			t.Errorf("Expected not to find string literal in \"%s\"", s)
+		}
+	}
+}
