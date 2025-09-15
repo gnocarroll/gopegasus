@@ -109,12 +109,12 @@ func TestScanFloat(t *testing.T) {
 func TestScanString(t *testing.T) {
 	validStrings := [...]string{
 		`"Hello"`,
-		`"Hello\"\"\"\\"`,
-		`"Hello, World!!!!\n\n\t\r"`,
+		"\"Hello\\\"\\\"\\\"\\\\\"",
+		"\"Hello, World!!!!\n\n\t\r\"",
 	}
 	invalidStrings := [...]string{
 		`"Hello`,
-		`"Hello\"`,
+		"\"Hello\\\"",
 		`Hello`,
 		`9.5`,
 		`9`,
