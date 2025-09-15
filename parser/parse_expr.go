@@ -103,14 +103,13 @@ func (parser *Parser) parseUnaryExpr() IExpr {
 		}
 	}
 
+	var subExpr IExpr
+
 	if foundOp {
 		parser.scan.Advance()
-	}
-
-	subExpr := parser.parsePostfixExpr()
-
-	if !foundOp {
-		return subExpr
+		subExpr = parser.parseUnaryExpr()
+	} else {
+		return parser.parsePostfixExpr()
 	}
 
 	return &UnaryExpr{
