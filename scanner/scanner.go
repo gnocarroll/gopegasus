@@ -402,17 +402,30 @@ func tryTokFunctions(s string) (TokenType, string, bool) {
 		scanString,
 	}
 
+	maxMatch := 0
+	retTType := TOK_EOF
+	retStr := ""
+
 	for _, scanFunc := range scanFuncs {
-		ttype, s, ok := scanFunc(s)
+		ttype, foundS, ok := scanFunc(s)
 
 		if !ok {
 			continue
 		}
 
-		return ttype, s, ok
+		if len(foundS) > maxMatch {
+			maxMatch = len(foundS)
+
+			retTType = ttype
+			retStr = foundS
+		}
 	}
 
-	return TOK_EOF, "", false
+	if maxMatch <= 0 {
+		return TOK_EOF, "", false
+	}
+
+	return retTType, retStr, true
 }
 
 func scanInteger(s string) (TokenType, string, bool) {

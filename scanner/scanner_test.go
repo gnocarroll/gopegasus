@@ -25,6 +25,7 @@ func TestScannerTokenType(t *testing.T) {
 			TOK_IF,
 			TOK_SEMI,
 		},
+		`1.5 "Hello, World!" while`: {TOK_FLOAT, TOK_STRING, TOK_WHILE},
 	}
 
 	tokStringsLen := len(TokStrings)
