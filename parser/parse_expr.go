@@ -1,9 +1,7 @@
 package parser
 
 import (
-	"log"
 	"pegasus/scanner"
-	"strconv"
 )
 
 var binaryOps [][]scanner.TokenType = [][]scanner.TokenType{
@@ -134,6 +132,8 @@ func (parser *Parser) parsePostfixExpr() IExpr {
 
 func (parser *Parser) parsePrimaryExpr() IExpr {
 	var ret IExpr = nil
+	var err error = nil
+
 	nextTok := parser.scan.Peek()
 
 	switch nextTok.TType {
@@ -141,38 +141,18 @@ func (parser *Parser) parsePrimaryExpr() IExpr {
 		ret = parser.parseExpr()
 		parser.accept(scanner.TOK_R_PAREN)
 	case scanner.TOK_INTEGER:
-		value, err := strconv.ParseUint(
-			nextTok.Text,
-			0,
-			64,
-		)
-
-		if err != nil {
-			log.Printf("Expected integer in \"%s\"", nextTok.Text)
-			value = 0
-		}
-
-		ret = &IntegerLiteral{
-			Value: value,
-		}
+		ret, err = IntegerLiteralFromTok(&nextTok)
 	case scanner.TOK_FLOAT:
-		value, err := strconv.ParseFloat(
-			nextTok.Text,
-			64,
-		)
-
-		if err != nil {
-			log.Printf("Expected float in \"%s\"", nextTok.Text)
-			value = 0.0
-		}
-
-		ret = &FloatLiteral{
-			Value: value,
-		}
+		ret, err = FloatLiteralFromTok(&nextTok)
 	case scanner.TOK_STRING:
-
+		ret, err = StringLiteralFromTok(&nextTok)
 	default:
 		return nil
+	}
+
+	if err != nil {
+		parser.malformed(&nextTok)
+		ret = &ErrorExpr{}
 	}
 
 	if nextTok.TType != scanner.TOK_L_PAREN {
@@ -183,5 +163,5 @@ func (parser *Parser) parsePrimaryExpr() IExpr {
 
 	parser.scan.Advance()
 
-	return nil
+	return ret
 }

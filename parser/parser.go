@@ -39,6 +39,14 @@ func (parser *Parser) send(node INode) {
 	}
 }
 
+func (parser *Parser) addError(err *ParseError) {
+	if parser.errCount.Load() < MAX_PARSE_ERRORS {
+		parser.errCount.Add(1)
+
+		*parser.errChan <- *err
+	}
+}
+
 func (parser *Parser) accept(ttype scanner.TokenType) (*scanner.Token, error) {
 	t := parser.scan.Peek()
 
@@ -52,13 +60,19 @@ func (parser *Parser) accept(ttype scanner.TokenType) (*scanner.Token, error) {
 		Found:    t,
 	}
 
-	if parser.errCount.Load() < MAX_PARSE_ERRORS {
-		parser.errCount.Add(1)
-
-		*parser.errChan <- e
-	}
+	parser.addError(&e)
 
 	return nil, &e
+}
+
+func (parser *Parser) malformed(tok *scanner.Token) {
+	e := &ParseError{
+		Expected: tok.TType,
+		Found:    *tok,
+		Message:  "malformed token",
+	}
+
+	parser.addError(e)
 }
 
 func (parser *Parser) parse() {

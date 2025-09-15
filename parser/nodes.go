@@ -63,6 +63,10 @@ type Expr struct {
 
 func (expr *Expr) exprTag() {}
 
+type ErrorExpr struct {
+	Expr
+}
+
 type BinaryExpr struct {
 	Expr
 
