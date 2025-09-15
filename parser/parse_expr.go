@@ -148,14 +148,20 @@ func (parser *Parser) parsePrimaryExpr() IExpr {
 
 	switch nextTok.TType {
 	case scanner.TOK_L_PAREN:
+		parser.scan.Advance()
+
 		ret = parser.parseExpr()
+
 		parser.accept(scanner.TOK_R_PAREN)
 	case scanner.TOK_INTEGER:
 		ret, err = IntegerLiteralFromTok(&nextTok)
+		parser.scan.Advance()
 	case scanner.TOK_FLOAT:
 		ret, err = FloatLiteralFromTok(&nextTok)
+		parser.scan.Advance()
 	case scanner.TOK_STRING:
 		ret, err = StringLiteralFromTok(&nextTok)
+		parser.scan.Advance()
 	case scanner.TOK_IDENT:
 		ret = parser.parseIdentExpr()
 	default:
@@ -172,8 +178,6 @@ func (parser *Parser) parsePrimaryExpr() IExpr {
 
 		ret.SetPosition(nextTok.Line, nextTok.Column)
 	}
-
-	parser.scan.Advance()
 
 	return ret
 }
