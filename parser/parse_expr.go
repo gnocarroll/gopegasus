@@ -127,6 +127,16 @@ func (parser *Parser) parsePostfixExpr() IExpr {
 		return nil
 	}
 
+	nextTok := parser.scan.Peek()
+
+	switch nextTok.TType {
+	case scanner.TOK_L_PAREN: // Function Call
+
+	case scanner.TOK_PERIOD: // Member Access
+
+	default: // No operation to parse here
+	}
+
 	return subExpr
 }
 
@@ -146,6 +156,8 @@ func (parser *Parser) parsePrimaryExpr() IExpr {
 		ret, err = FloatLiteralFromTok(&nextTok)
 	case scanner.TOK_STRING:
 		ret, err = StringLiteralFromTok(&nextTok)
+	case scanner.TOK_IDENT:
+		ret = parser.parseIdentExpr()
 	default:
 		return nil
 	}
@@ -162,6 +174,41 @@ func (parser *Parser) parsePrimaryExpr() IExpr {
 	}
 
 	parser.scan.Advance()
+
+	return ret
+}
+
+func (parser *Parser) parseIdentExpr() IExpr {
+	tok := parser.scan.Peek()
+
+	if tok.TType != scanner.TOK_IDENT {
+		return nil
+	}
+
+	parser.scan.Advance()
+
+	ret := &IdentExpr{
+		Names: []string{tok.Text},
+	}
+
+	for {
+		tok = parser.scan.Peek()
+
+		// Namespace Separator: "::"
+		if tok.TType != scanner.TOK_COLON_COLON {
+			break
+		}
+
+		parser.scan.Advance()
+
+		tokRef, err := parser.accept(scanner.TOK_IDENT)
+
+		if err != nil {
+			break
+		}
+
+		ret.Names = append(ret.Names, tokRef.Text)
+	}
 
 	return ret
 }

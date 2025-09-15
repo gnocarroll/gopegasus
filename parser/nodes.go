@@ -99,3 +99,10 @@ type FloatLiteral struct {
 
 	Value float64
 }
+
+type IdentExpr struct {
+	Expr
+
+	// Namespaces followed by final identifier
+	Names []string
+}

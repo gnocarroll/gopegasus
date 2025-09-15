@@ -1,6 +1,9 @@
 package parser
 
-import "strconv"
+import (
+	"strconv"
+	"strings"
+)
 
 func ExprToString(expr IExpr) string {
 	s := ""
@@ -27,6 +30,8 @@ func ExprToString(expr IExpr) string {
 			expr.Value,
 			10,
 		)
+	case *IdentExpr:
+		s = strings.Join(expr.Names, "::")
 	default:
 	}
 
