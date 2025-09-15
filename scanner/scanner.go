@@ -213,6 +213,9 @@ func (scanner *Scanner) fillCache() {
 	if scanner.isCacheFilled {
 		return
 	}
+	if scanner.tChan == nil {
+		scanner.initScanner()
+	}
 
 	scanner.isCacheFilled = true
 
@@ -229,10 +232,6 @@ func (scanner *Scanner) fillCache() {
 }
 
 func (scanner *Scanner) Advance() Token {
-	if scanner.tChan == nil {
-		scanner.initScanner()
-	}
-
 	// attempt to load first two tokens if not already done
 
 	scanner.fillCache()
