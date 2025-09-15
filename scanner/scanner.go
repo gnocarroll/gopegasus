@@ -156,6 +156,14 @@ var TokDescs = [...]string{
 	TOK_FLOAT:     "Floating-Point Number",
 }
 
+func (ttype TokenType) Text() string {
+	if ttype < 0 || int(ttype) >= len(TokStrings) {
+		return ""
+	}
+
+	return TokStrings[ttype]
+}
+
 func (ttype TokenType) Desc() string {
 	if ttype < 0 || int(ttype) >= len(TokDescs) {
 		return ""
