@@ -63,3 +63,44 @@ func TestScannerTokenType(t *testing.T) {
 		}
 	}
 }
+
+func TestScanFloat(t *testing.T) {
+	validFloats := [...]string{
+		"1.5",
+		"0.5",
+		".5E10",
+		"5.E10",
+		"1.5E+1",
+		"1.5E-1",
+	}
+	invalidFloats := [...]string{
+		"1",
+		"hello",
+		"",
+		".",
+		".E5",
+		"1.5E",
+	}
+
+	for _, s := range validFloats {
+		_, foundS, found := scanFloat(s)
+
+		if !found {
+			t.Errorf("Expected to find float in \"%s\"", s)
+		}
+		if s != foundS {
+			t.Errorf(
+				"Expected to receive \"%s\", got \"%s\"",
+				s,
+				foundS,
+			)
+		}
+	}
+	for _, s := range invalidFloats {
+		_, _, found := scanFloat(s)
+
+		if found {
+			t.Errorf("Expected not to find float in \"%s\"", s)
+		}
+	}
+}

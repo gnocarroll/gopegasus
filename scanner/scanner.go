@@ -27,6 +27,7 @@ const (
 	TOK_IF
 	TOK_FOR
 	TOK_WHILE
+	TOK_BEGIN
 	TOK_END
 	TOK_GT
 	TOK_LT
@@ -83,6 +84,7 @@ var TokStrings = [...]string{
 	TOK_VARIANT:     "variant",
 	TOK_COLON_COLON: "::",
 	TOK_FOR:         "for",
+	TOK_BEGIN:       "begin",
 	TOK_END:         "end",
 	TOK_STAR:        "*",
 	TOK_F_SLASH:     "/",
@@ -128,6 +130,7 @@ var TokDescs = [...]string{
 	TOK_CLASS:     "Class ('class')",
 	TOK_ENUM:      "Enum ('enum')",
 	TOK_VARIANT:   "Variant ('variant')",
+	TOK_BEGIN:     "Begin ('begin')",
 	TOK_END:       "End ('end')",
 	TOK_GT:        "Greater Than ('>')",
 	TOK_LT:        "Less Than ('<')",
@@ -392,7 +395,12 @@ type ScanFunc func(string) (TokenType, string, bool)
 // see if next token can be found by scanner funcs for variable-length tokens
 // (e.g. integers, identifiers, etc.)
 func tryTokFunctions(s string) (TokenType, string, bool) {
-	scanFuncs := [...]ScanFunc{scanInteger, scanIdent, scanFloat}
+	scanFuncs := [...]ScanFunc{
+		scanInteger,
+		scanIdent,
+		scanFloat,
+		scanString,
+	}
 
 	for _, scanFunc := range scanFuncs {
 		ttype, s, ok := scanFunc(s)
@@ -458,5 +466,94 @@ func scanIdent(s string) (TokenType, string, bool) {
 }
 
 func scanFloat(s string) (TokenType, string, bool) {
-	return TOK_EOF, "", false
+	pointOffset := -1
+	pointEndOffset := -1
+
+	eOffset := -1
+	eEndOffset := -1
+	digitsAfterE := false
+
+	totalWidth := 0
+	sLen := len(s)
+
+	for totalWidth < sLen {
+		r, width := utf8.DecodeRuneInString(s[totalWidth:])
+
+		if unicode.IsDigit(r) {
+			if eOffset != -1 {
+				digitsAfterE = true
+			}
+		} else if r == '.' {
+			if pointOffset != -1 {
+				break
+			}
+
+			pointOffset = totalWidth
+			pointEndOffset = pointOffset + width
+		} else if r == 'e' || r == 'E' {
+			if eOffset != -1 {
+				break
+			}
+
+			eOffset = totalWidth
+			eEndOffset = eOffset + width
+		} else if totalWidth == eEndOffset && (r == '+' || r == '-') {
+			// okay to have plus/minus immediately after e/E
+		} else {
+			// character not part of float literal, exit loop
+			break
+		}
+
+		totalWidth += width
+	}
+
+	// Conditions which indicate failure
+	// - point not found
+	// - no digits on left or right of point
+	// - e/E was found but no digits after it
+
+	if pointOffset == -1 ||
+		(pointOffset == 0 && (pointEndOffset == eOffset || pointEndOffset == totalWidth)) ||
+		(eOffset != -1 && !digitsAfterE) {
+		return TOK_EOF, "", false
+	}
+
+	// success, return relevant slice
+
+	return TOK_FLOAT, s[:totalWidth], true
+}
+
+func scanString(s string) (TokenType, string, bool) {
+	foundEndQuote := false
+
+	width := 0
+	sLen := len(s)
+
+	isEscaped := false
+
+	for width < sLen {
+		r, bytes := utf8.DecodeRuneInString(s[width:])
+
+		if width == 0 && r != '"' {
+			break
+		}
+
+		if isEscaped {
+			isEscaped = false
+		} else if width != 0 && r == '"' {
+			foundEndQuote = true
+			width += bytes
+			break
+		} else if r == '\\' {
+			isEscaped = true
+		}
+
+		width += bytes
+	}
+
+	if width == 0 || !foundEndQuote {
+		return TOK_EOF, "", false
+	}
+
+	return TOK_STRING, s[:width], true
 }
