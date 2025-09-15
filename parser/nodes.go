@@ -106,3 +106,21 @@ type IdentExpr struct {
 	// Namespaces followed by final identifier
 	Names []string
 }
+
+type FunctionCallExpr struct {
+	Expr
+
+	Function IExpr
+	Args     CallArgs
+}
+
+// Represents argument passed to function call,
+// name will be non-empty if it is keyword arg
+type CallArg struct {
+	Name  string
+	Value IExpr
+}
+
+type CallArgs struct {
+	ArgList []CallArg
+}

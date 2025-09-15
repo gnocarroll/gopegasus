@@ -77,6 +77,7 @@ func TestParseValidExprs(t *testing.T) {
 		"A::B::x",
 		"2 ** A::B::x",
 		"(1 + 2) * 3",
+		"x + 2",
 	}
 	outputs := [...]string{
 		"(+ 5 5)",
@@ -87,6 +88,7 @@ func TestParseValidExprs(t *testing.T) {
 		"A::B::x",
 		"(** 2 A::B::x)",
 		"(* (+ 1 2) 3)",
+		"(+ x 2)",
 	}
 
 	nLoops := min(len(exprs), len(outputs))
