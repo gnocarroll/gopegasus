@@ -112,10 +112,13 @@ func (parser *Parser) parseUnaryExpr() IExpr {
 		return parser.parsePostfixExpr()
 	}
 
-	return &UnaryExpr{
+	ret := &UnaryExpr{
 		Operator: nextTok,
 		SubExpr:  subExpr,
 	}
+	ret.SetPosition(nextTok.Line, nextTok.Column)
+
+	return ret
 }
 
 // e.g. function call, member access
@@ -130,9 +133,11 @@ func (parser *Parser) parsePostfixExpr() IExpr {
 
 	switch nextTok.TType {
 	case scanner.TOK_L_PAREN: // Function Call
+		parser.scan.Advance()
 
+		parser.accept(scanner.TOK_R_PAREN)
 	case scanner.TOK_PERIOD: // Member Access
-
+		parser.scan.Advance()
 	default: // No operation to parse here
 	}
 
