@@ -153,6 +153,39 @@ type Statement struct {
 
 func (*Statement) statementTag() {}
 
-type CreateVarStatement struct {
+// e.g. x += 10;
+type ModifyVarStatement struct {
 	Statement
+
+	Var      *IdentExpr
+	Operator scanner.Token
+	Rhs      IExpr
+}
+
+// e.g. i++;
+type IncDecStatement struct {
+	Statement
+
+	Var   *IdentExpr
+	IsInc bool
+}
+
+type CompoundStatement struct {
+	Statement
+
+	Statements []IStatement
+}
+
+type LoopStatement struct {
+	Statement
+
+	// flags indicating if certain component should be present
+	HasBefore    bool
+	HasCondition bool
+	HasAfter     bool
+
+	Before    IStatement // e.g. i := 0 in for loop
+	Condition IExpr
+	After     IStatement // e.g. i++ in for loop
+	Body      *CompoundStatement
 }

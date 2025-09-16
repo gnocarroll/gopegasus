@@ -46,6 +46,8 @@ const (
 	TOK_PIPE_EQ
 	TOK_LT_LT_EQ
 	TOK_GT_GT_EQ
+	TOK_PLUS_PLUS
+	TOK_MINUS_MINUS
 	TOK_EQ_EQ
 	TOK_LT_LT
 	TOK_GT_GT
@@ -121,6 +123,8 @@ var TokStrings = [...]string{
 	TOK_PIPE_EQ:      "|=",
 	TOK_LT_LT_EQ:     "<<=",
 	TOK_GT_GT_EQ:     ">>=",
+	TOK_PLUS_PLUS:    "++",
+	TOK_MINUS_MINUS:  "--",
 	TOK_COLON:        ":",
 	TOK_COLON_EQ:     ":=",
 	TOK_EQ_EQ:        "==",
@@ -173,6 +177,8 @@ var TokDescs = [...]string{
 	TOK_PIPE_EQ:      "Bit Or Equals ('|=')",
 	TOK_LT_LT_EQ:     "Left Shift Equals ('<<=')",
 	TOK_GT_GT_EQ:     "Right Shift Equals ('>>=')",
+	TOK_PLUS_PLUS:    "Increment ('++')",
+	TOK_MINUS_MINUS:  "Decrement ('--')",
 	TOK_EQ_EQ:        "Equal To ('==')",
 	TOK_COLON_EQ:     "Assign + Infer Type (':=')",
 	TOK_BANG_EQ:      "Not Equal To ('!=')",
