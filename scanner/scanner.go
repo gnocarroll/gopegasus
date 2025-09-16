@@ -18,6 +18,7 @@ const (
 	TOK_L_BRACK
 	TOK_R_BRACK
 	TOK_SEMI
+	TOK_COMMA
 	TOK_FUNCTION
 	TOK_LAMBDA
 	TOK_STRUCT
@@ -67,6 +68,7 @@ var TokStrings = [...]string{
 	TOK_L_BRACK:     "[",
 	TOK_R_BRACK:     "]",
 	TOK_SEMI:        ";",
+	TOK_COMMA:       ",",
 	TOK_FUNCTION:    "function",
 	TOK_IF:          "if",
 	TOK_WHILE:       "while",
@@ -113,6 +115,7 @@ var TokDescs = [...]string{
 	TOK_R_PAREN:   "Right Paren (')')",
 	TOK_L_BRACK:   "Left Bracket ('[')",
 	TOK_R_BRACK:   "Right Bracket (']')",
+	TOK_COMMA:     "Comma (',')",
 	TOK_AMPERSAND: "Ampersand ('&')",
 	TOK_CARROT:    "Carrot ('^')",
 	TOK_TILDE:     "Tilde ('~')",

@@ -17,7 +17,10 @@ type Parser struct {
 type ParseError struct {
 	Expected scanner.TokenType
 	Found    scanner.Token
-	Message  string
+
+	ExpectedNode INode
+
+	Message string
 }
 
 func (err *ParseError) Error() string {

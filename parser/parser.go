@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"pegasus/scanner"
 )
 
@@ -63,6 +64,18 @@ func (parser *Parser) accept(ttype scanner.TokenType) (*scanner.Token, error) {
 	parser.addError(&e)
 
 	return nil, &e
+}
+
+func (parser *Parser) expectedNode(node INode) {
+	e := ParseError{
+		ExpectedNode: node,
+		Message: fmt.Sprintf(
+			"Expected but did not find node of type %T",
+			node,
+		),
+	}
+
+	parser.addError(&e)
 }
 
 func (parser *Parser) malformed(tok *scanner.Token) {
@@ -185,7 +198,7 @@ func (parser *Parser) parseCallArgs() CallArgs {
 		tok1 := parser.scan.Peek()
 		tok2 := parser.scan.PeekSecond()
 
-		if tok1.TType == scanner.TOK_L_PAREN {
+		if tok1.TType == scanner.TOK_R_PAREN {
 			break
 		}
 
@@ -199,6 +212,22 @@ func (parser *Parser) parseCallArgs() CallArgs {
 			parser.scan.Advance()
 
 			arg.Name = tok1.Text
+		}
+
+		arg.Value = parser.parseExpr()
+
+		if arg.Value == nil {
+			var expr IExpr = &Expr{}
+
+			tok := parser.scan.Peek()
+
+			expr.SetPosition(tok.Line, tok.Column)
+
+			// failed to find expression when one was expected
+
+			parser.expectedNode(expr)
+
+			arg.Value = expr
 		}
 
 		args.ArgList = append(args.ArgList, arg)
