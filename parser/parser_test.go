@@ -118,9 +118,15 @@ func TestParseValidExprs(t *testing.T) {
 func TestParsePostfixExprs(t *testing.T) {
 	exprs := [...]string{
 		"f(1, 2, 3)",
+		"f()",
+		"point.x",
+		"list.get(0)",
 	}
 	outputs := [...]string{
 		"(f 1 2 3)",
+		"(f)",
+		"point.x",
+		"(list.get 0)",
 	}
 
 	nLoops := min(len(exprs), len(outputs))

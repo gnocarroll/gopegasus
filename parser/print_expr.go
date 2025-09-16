@@ -45,14 +45,24 @@ func ExprToString(expr IExpr) string {
 	case *IdentExpr:
 		s = strings.Join(expr.Names, "::")
 	case *FunctionCallExpr:
-		argStrs := make([]string, len(expr.Args.ArgList))
+		s = "(" + ExprToString(expr.Function)
 
-		for i, arg := range expr.Args.ArgList {
-			argStrs[i] = callArgToString(&arg)
+		nargs := len(expr.Args.ArgList)
+
+		if nargs > 0 {
+			argStrs := make([]string, nargs)
+
+			for i, arg := range expr.Args.ArgList {
+				argStrs[i] = callArgToString(&arg)
+			}
+
+			s += (" " + strings.Join(argStrs, " "))
 		}
 
-		s = "(" + ExprToString(expr.Function) + " " +
-			strings.Join(argStrs, " ") + ")"
+		s += ")"
+	case *MemberAccessExpr:
+		s = ExprToString(expr.Instance) +
+			"." + expr.Member
 	default:
 	}
 
