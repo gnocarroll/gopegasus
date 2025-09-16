@@ -115,7 +115,7 @@ func TestParseValidExprs(t *testing.T) {
 	}
 }
 
-func TestParsePostfixExprs(t *testing.T) {
+func TestParseValidPostfixExprs(t *testing.T) {
 	exprs := [...]string{
 		"f(1, 2, 3)",
 		"f()",
