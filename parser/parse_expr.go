@@ -129,19 +129,49 @@ func (parser *Parser) parsePostfixExpr() IExpr {
 		return nil
 	}
 
+	ret := subExpr
+
 	nextTok := parser.scan.Peek()
 
 	switch nextTok.TType {
-	case scanner.TOK_L_PAREN: // Function Call
+	// Function Call or Template Expansion
+	case scanner.TOK_L_PAREN, scanner.TOK_L_BRACK:
 		parser.scan.Advance()
 
-		parser.accept(scanner.TOK_R_PAREN)
+		isTemplateCall := (nextTok.TType == scanner.TOK_L_BRACK)
+
+		ret = &FunctionCallExpr{
+			IsTemplateCall: isTemplateCall,
+			Function:       subExpr,
+			Args:           parser.parseCallArgs(),
+		}
+		ret.SetPosition(subExpr.Line(), subExpr.Column())
+
+		if isTemplateCall {
+			parser.accept(scanner.TOK_R_BRACK)
+		} else {
+			parser.accept(scanner.TOK_R_PAREN)
+		}
 	case scanner.TOK_PERIOD: // Member Access
 		parser.scan.Advance()
+
+		tok, _ := parser.accept(scanner.TOK_IDENT)
+
+		member := ""
+
+		if tok != nil {
+			member = tok.Text
+		}
+
+		ret = &MemberAccessExpr{
+			Instance: subExpr,
+			Member:   member,
+		}
+		ret.SetPosition(subExpr.Line(), subExpr.Column())
 	default: // No operation to parse here
 	}
 
-	return subExpr
+	return ret
 }
 
 func (parser *Parser) parsePrimaryExpr() IExpr {

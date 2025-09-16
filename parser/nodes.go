@@ -110,6 +110,10 @@ type IdentExpr struct {
 type FunctionCallExpr struct {
 	Expr
 
+	// true => template instantiation,
+	// e.g. List[Integer]
+	IsTemplateCall bool
+
 	Function IExpr
 	Args     CallArgs
 }
@@ -127,4 +131,12 @@ type CallArgs struct {
 	Node
 
 	ArgList []CallArg
+}
+
+// e.g. point.x
+type MemberAccessExpr struct {
+	Expr
+
+	Instance IExpr
+	Member   string
 }

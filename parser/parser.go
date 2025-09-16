@@ -231,6 +231,14 @@ func (parser *Parser) parseCallArgs() CallArgs {
 		}
 
 		args.ArgList = append(args.ArgList, arg)
+
+		comma := parser.scan.Peek()
+
+		if comma.TType != scanner.TOK_COMMA {
+			break
+		}
+
+		parser.scan.Advance()
 	}
 
 	return args
