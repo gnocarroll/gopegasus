@@ -189,3 +189,17 @@ type LoopStatement struct {
 	After     IStatement // e.g. i++ in for loop
 	Body      IStatement
 }
+
+type IfThen struct {
+	Condition IExpr
+	Body      IStatement
+}
+
+type IfStatement struct {
+	Statement
+
+	HasElse bool
+
+	IfThens []IfThen
+	Else    IStatement
+}
