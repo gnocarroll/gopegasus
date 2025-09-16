@@ -117,10 +117,14 @@ type FunctionCallExpr struct {
 // Represents argument passed to function call,
 // name will be non-empty if it is keyword arg
 type CallArg struct {
+	Node
+
 	Name  string
 	Value IExpr
 }
 
 type CallArgs struct {
+	Node
+
 	ArgList []CallArg
 }

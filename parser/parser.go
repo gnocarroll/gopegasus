@@ -177,5 +177,32 @@ func (parser *Parser) parseAssignment() *Definition {
 func (parser *Parser) parseCallArgs() CallArgs {
 	var args CallArgs
 
+	tok := parser.scan.Peek()
+
+	args.SetPosition(tok.Line, tok.Column)
+
+	for {
+		tok1 := parser.scan.Peek()
+		tok2 := parser.scan.PeekSecond()
+
+		if tok1.TType == scanner.TOK_L_PAREN {
+			break
+		}
+
+		var arg CallArg
+
+		arg.SetPosition(tok1.Line, tok1.Column)
+
+		if tok1.TType == scanner.TOK_IDENT &&
+			tok2.TType == scanner.TOK_EQ {
+			parser.scan.Advance()
+			parser.scan.Advance()
+
+			arg.Name = tok1.Text
+		}
+
+		args.ArgList = append(args.ArgList, arg)
+	}
+
 	return args
 }
