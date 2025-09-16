@@ -35,6 +35,17 @@ const (
 	TOK_GE
 	TOK_LE
 	TOK_EQ
+	TOK_PLUS_EQ
+	TOK_MINUS_EQ
+	TOK_STAR_EQ
+	TOK_STAR_STAR_EQ
+	TOK_F_SLASH_EQ
+	TOK_PERCENT_EQ
+	TOK_AMPERSAND_EQ
+	TOK_CARROT_EQ
+	TOK_PIPE_EQ
+	TOK_LT_LT_EQ
+	TOK_GT_GT_EQ
 	TOK_EQ_EQ
 	TOK_LT_LT
 	TOK_GT_GT
@@ -63,49 +74,60 @@ const (
 )
 
 var TokStrings = [...]string{
-	TOK_L_PAREN:     "(",
-	TOK_R_PAREN:     ")",
-	TOK_L_BRACK:     "[",
-	TOK_R_BRACK:     "]",
-	TOK_SEMI:        ";",
-	TOK_COMMA:       ",",
-	TOK_FUNCTION:    "function",
-	TOK_IF:          "if",
-	TOK_WHILE:       "while",
-	TOK_AMPERSAND:   "&",
-	TOK_CARROT:      "^",
-	TOK_TILDE:       "~",
-	TOK_PIPE:        "|",
-	TOK_LT_LT:       "<<",
-	TOK_GT_GT:       ">>",
-	TOK_PERCENT:     "%",
-	TOK_LAMBDA:      "lambda",
-	TOK_STRUCT:      "struct",
-	TOK_CLASS:       "class",
-	TOK_ENUM:        "enum",
-	TOK_VARIANT:     "variant",
-	TOK_COLON_COLON: "::",
-	TOK_FOR:         "for",
-	TOK_BEGIN:       "begin",
-	TOK_END:         "end",
-	TOK_STAR:        "*",
-	TOK_F_SLASH:     "/",
-	TOK_PERIOD:      ".",
-	TOK_STAR_STAR:   "**",
-	TOK_PLUS:        "+",
-	TOK_MINUS:       "-",
-	TOK_LT:          "<",
-	TOK_GT:          ">",
-	TOK_LE:          "<=",
-	TOK_GE:          ">=",
-	TOK_EQ:          "=",
-	TOK_COLON:       ":",
-	TOK_COLON_EQ:    ":=",
-	TOK_EQ_EQ:       "==",
-	TOK_BANG_EQ:     "!=",
-	TOK_NOT:         "not",
-	TOK_AND:         "and",
-	TOK_OR:          "or",
+	TOK_L_PAREN:      "(",
+	TOK_R_PAREN:      ")",
+	TOK_L_BRACK:      "[",
+	TOK_R_BRACK:      "]",
+	TOK_SEMI:         ";",
+	TOK_COMMA:        ",",
+	TOK_FUNCTION:     "function",
+	TOK_IF:           "if",
+	TOK_WHILE:        "while",
+	TOK_AMPERSAND:    "&",
+	TOK_CARROT:       "^",
+	TOK_TILDE:        "~",
+	TOK_PIPE:         "|",
+	TOK_LT_LT:        "<<",
+	TOK_GT_GT:        ">>",
+	TOK_PERCENT:      "%",
+	TOK_LAMBDA:       "lambda",
+	TOK_STRUCT:       "struct",
+	TOK_CLASS:        "class",
+	TOK_ENUM:         "enum",
+	TOK_VARIANT:      "variant",
+	TOK_COLON_COLON:  "::",
+	TOK_FOR:          "for",
+	TOK_BEGIN:        "begin",
+	TOK_END:          "end",
+	TOK_STAR:         "*",
+	TOK_F_SLASH:      "/",
+	TOK_PERIOD:       ".",
+	TOK_STAR_STAR:    "**",
+	TOK_PLUS:         "+",
+	TOK_MINUS:        "-",
+	TOK_LT:           "<",
+	TOK_GT:           ">",
+	TOK_LE:           "<=",
+	TOK_GE:           ">=",
+	TOK_EQ:           "=",
+	TOK_PLUS_EQ:      "+=",
+	TOK_MINUS_EQ:     "-=",
+	TOK_STAR_EQ:      "*=",
+	TOK_STAR_STAR_EQ: "**=",
+	TOK_F_SLASH_EQ:   "/=",
+	TOK_PERCENT_EQ:   "%=",
+	TOK_AMPERSAND_EQ: "&=",
+	TOK_CARROT_EQ:    "^=",
+	TOK_PIPE_EQ:      "|=",
+	TOK_LT_LT_EQ:     "<<=",
+	TOK_GT_GT_EQ:     ">>=",
+	TOK_COLON:        ":",
+	TOK_COLON_EQ:     ":=",
+	TOK_EQ_EQ:        "==",
+	TOK_BANG_EQ:      "!=",
+	TOK_NOT:          "not",
+	TOK_AND:          "and",
+	TOK_OR:           "or",
 }
 
 var TokDescs = [...]string{

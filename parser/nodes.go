@@ -61,7 +61,7 @@ type Expr struct {
 	Node
 }
 
-func (expr *Expr) exprTag() {}
+func (*Expr) exprTag() {}
 
 type ErrorExpr struct {
 	Expr
@@ -139,4 +139,20 @@ type MemberAccessExpr struct {
 
 	Instance IExpr
 	Member   string
+}
+
+type IStatement interface {
+	INode
+
+	statementTag()
+}
+
+type Statement struct {
+	Node
+}
+
+func (*Statement) statementTag() {}
+
+type CreateVarStatement struct {
+	Statement
 }
