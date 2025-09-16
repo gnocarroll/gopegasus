@@ -187,5 +187,5 @@ type LoopStatement struct {
 	Before    IStatement // e.g. i := 0 in for loop
 	Condition IExpr
 	After     IStatement // e.g. i++ in for loop
-	Body      *CompoundStatement
+	Body      IStatement
 }
