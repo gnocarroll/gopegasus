@@ -121,12 +121,18 @@ func TestParseValidPostfixExprs(t *testing.T) {
 		"f()",
 		"point.x",
 		"list.get(0)",
+		"f(1)(2).g(3)",
+		"List[Integer]",
+		"f(1, 2, 3) + 3",
 	}
 	outputs := [...]string{
 		"(f 1 2 3)",
 		"(f)",
 		"point.x",
 		"(list.get 0)",
+		"(((f 1) 2).g 3)",
+		"(List Integer)",
+		"(+ (f 1 2 3) 3)",
 	}
 
 	nLoops := min(len(exprs), len(outputs))

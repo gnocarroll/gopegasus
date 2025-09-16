@@ -123,52 +123,63 @@ func (parser *Parser) parseUnaryExpr() IExpr {
 
 // e.g. function call, member access
 func (parser *Parser) parsePostfixExpr() IExpr {
-	subExpr := parser.parsePrimaryExpr()
+	ret := parser.parsePrimaryExpr()
 
-	if subExpr == nil {
-		return nil
+	if ret == nil {
+		return ret
 	}
 
-	ret := subExpr
+	line, column := ret.Position()
 
-	nextTok := parser.scan.Peek()
+	for {
+		noPostfixOp := false
+		nextTok := parser.scan.Peek()
 
-	switch nextTok.TType {
-	// Function Call or Template Expansion
-	case scanner.TOK_L_PAREN, scanner.TOK_L_BRACK:
-		parser.scan.Advance()
+		switch nextTok.TType {
+		// Function Call or Template Expansion
+		case scanner.TOK_L_PAREN, scanner.TOK_L_BRACK:
+			parser.scan.Advance()
 
-		isTemplateCall := (nextTok.TType == scanner.TOK_L_BRACK)
+			isTemplateCall := (nextTok.TType == scanner.TOK_L_BRACK)
 
-		ret = &FunctionCallExpr{
-			IsTemplateCall: isTemplateCall,
-			Function:       subExpr,
-			Args:           parser.parseCallArgs(),
+			ret = &FunctionCallExpr{
+				IsTemplateCall: isTemplateCall,
+				Function:       ret,
+				Args:           parser.parseCallArgs(),
+			}
+			ret.SetPosition(line, column)
+
+			if isTemplateCall {
+				parser.accept(scanner.TOK_R_BRACK)
+			} else {
+				parser.accept(scanner.TOK_R_PAREN)
+			}
+		case scanner.TOK_PERIOD: // Member Access
+			parser.scan.Advance()
+
+			tok, _ := parser.accept(scanner.TOK_IDENT)
+
+			member := ""
+
+			if tok != nil {
+				member = tok.Text
+			}
+
+			ret = &MemberAccessExpr{
+				Instance: ret,
+				Member:   member,
+			}
+			ret.SetPosition(ret.Line(), ret.Column())
+		default:
+			noPostfixOp = true
 		}
-		ret.SetPosition(subExpr.Line(), subExpr.Column())
 
-		if isTemplateCall {
-			parser.accept(scanner.TOK_R_BRACK)
-		} else {
-			parser.accept(scanner.TOK_R_PAREN)
+		// parsed 0+ postfix ops and another one was not found
+		// => break out of loop
+
+		if noPostfixOp {
+			break
 		}
-	case scanner.TOK_PERIOD: // Member Access
-		parser.scan.Advance()
-
-		tok, _ := parser.accept(scanner.TOK_IDENT)
-
-		member := ""
-
-		if tok != nil {
-			member = tok.Text
-		}
-
-		ret = &MemberAccessExpr{
-			Instance: subExpr,
-			Member:   member,
-		}
-		ret.SetPosition(subExpr.Line(), subExpr.Column())
-	default: // No operation to parse here
 	}
 
 	return ret
