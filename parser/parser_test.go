@@ -114,3 +114,33 @@ func TestParseValidExprs(t *testing.T) {
 		}
 	}
 }
+
+func TestParsePostfixExprs(t *testing.T) {
+	exprs := [...]string{
+		"f(1, 2, 3)",
+	}
+	outputs := [...]string{
+		"(f 1 2 3)",
+	}
+
+	nLoops := min(len(exprs), len(outputs))
+
+	for i := 0; i < nLoops; i++ {
+		got, err := parseExprForTest(exprs[i])
+
+		if err != nil {
+			t.Errorf("Unexpected err while parsing expr")
+			continue
+		}
+
+		expected := outputs[i]
+
+		if got != expected {
+			t.Errorf(
+				"Expected \"%s\", got \"%s\"",
+				expected,
+				got,
+			)
+		}
+	}
+}

@@ -5,6 +5,18 @@ import (
 	"strings"
 )
 
+func callArgToString(arg *CallArg) string {
+	ret := ""
+
+	if arg.Name != "" {
+		ret += (arg.Name + "=")
+	}
+
+	ret += ExprToString(arg.Value)
+
+	return ret
+}
+
 func ExprToString(expr IExpr) string {
 	s := ""
 
@@ -32,6 +44,15 @@ func ExprToString(expr IExpr) string {
 		)
 	case *IdentExpr:
 		s = strings.Join(expr.Names, "::")
+	case *FunctionCallExpr:
+		argStrs := make([]string, len(expr.Args.ArgList))
+
+		for i, arg := range expr.Args.ArgList {
+			argStrs[i] = callArgToString(&arg)
+		}
+
+		s = "(" + ExprToString(expr.Function) + " " +
+			strings.Join(argStrs, " ") + ")"
 	default:
 	}
 
